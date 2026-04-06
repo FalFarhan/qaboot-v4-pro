@@ -482,6 +482,37 @@ def calculate_trade():
     
     return jsonify(result)
 
+# ============== PAGE ROUTES ==============
+@app.route('/charts')
+def charts_page():
+    """صفحة الرسوم البيانية"""
+    return render_template('charts.html')
+
+@app.route('/portfolio')
+def portfolio_page():
+    """صفحة المحفظة"""
+    return render_template('portfolio.html')
+
+@app.route('/signals')
+def signals_page():
+    """صفحة الإشارات"""
+    return render_template('signals.html')
+
+@app.route('/strategies')
+def strategies_page():
+    """صفحة الاستراتيجيات"""
+    return render_template('strategies.html')
+
+@app.route('/trading')
+def trading_page():
+    """صفحة التداول"""
+    return render_template('trading.html')
+
+@app.route('/settings')
+def settings_page():
+    """صفحة الإعدادات"""
+    return render_template('settings.html')
+
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5000))
