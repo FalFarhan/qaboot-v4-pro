@@ -538,6 +538,46 @@ def get_portfolio_summary():
         'active_signals': 12
     })
 
+# ============== CANDLES API ==============
+@app.route('/api/candles/<coin>/<timeframe>')
+def get_candles(coin, timeframe):
+    """جلب شموع حية من Binance API"""
+    interval_map = {
+        '15m': '15m',
+        '1h': '1h', 
+        '4h': '4h',
+        '1d': '1d'
+    }
+    
+    interval = interval_map.get(timeframe, '1h')
+    symbol = f"{coin.upper()}USDT"
+    
+    try:
+        url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit=100"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        
+        data = response.json()
+        candles = []
+        
+        for item in data:
+            candles.append({
+                'timestamp': item[0],
+                'open': float(item[1]),
+                'high': float(item[2]),
+                'low': float(item[3]),
+                'close': float(item[4]),
+                'volume': float(item[5]),
+                'close_time': item[6]
+            })
+        
+        return jsonify(candles)
+        
+    except Exception as e:
+        print(f"Error fetching candles for {symbol}: {e}")
+        # Return empty candles if API fails
+        return jsonify([])
+
 # ============== PAGE ROUTES ==============
 @app.route('/charts')
 def charts_page():
