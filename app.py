@@ -4,7 +4,6 @@ FAL Army - Web Application
 """
 
 from flask import Flask, render_template, jsonify, request
-from flask_socketio import SocketIO, emit
 from datetime import datetime
 import requests
 import json
@@ -14,7 +13,6 @@ import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'qaboot-v4-pro-secret'
-socketio = SocketIO(app, cors_allowed_origins="*")
 
 # ============== BINANCE API ==============
 class BinanceAPI:
@@ -482,7 +480,8 @@ def calculate_trade():
     
     return jsonify(result)
 
+# For production with Gunicorn
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5000))
-    socketio.run(app, host='0.0.0.0', port=port, debug=False, allow_unsafe_werkzeug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)
