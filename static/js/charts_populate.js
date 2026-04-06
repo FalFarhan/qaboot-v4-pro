@@ -25,6 +25,87 @@ function formatPrice(price) {
     return `$${price.toFixed(6)}`;
 }
 
+// Draw candlestick chart
+function drawCandlestickChart(candles) {
+    const svg = document.getElementById('main-chart-svg');
+    if (!svg) return;
+    
+    // Clear existing content
+    svg.innerHTML = '';
+    
+    // Chart dimensions
+    const width = 1000;
+    const height = 400;
+    const padding = 40;
+    
+    // Calculate min/max for scaling
+    const prices = candles.flatMap(c => [c.high, c.low]);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    const priceRange = maxPrice - minPrice;
+    
+    // Add grid lines
+    for (let i = 0; i <= 4; i++) {
+        const y = (height / 4) * i;
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', 0);
+        line.setAttribute('y1', y);
+        line.setAttribute('x2', width);
+        line.setAttribute('y2', y);
+        line.setAttribute('class', 'chart-grid');
+        svg.appendChild(line);
+        
+        // Price label
+        const price = maxPrice - (priceRange * (i / 4));
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', 5);
+        text.setAttribute('y', y - 5);
+        text.setAttribute('fill', '#737580');
+        text.setAttribute('font-size', '10');
+        text.textContent = formatPrice(price);
+        svg.appendChild(text);
+    }
+    
+    // Draw candles
+    const candleWidth = (width - 2 * padding) / candles.length * 0.7;
+    const candleSpacing = (width - 2 * padding) / candles.length;
+    
+    candles.forEach((candle, i) => {
+        const x = padding + i * candleSpacing + candleSpacing / 2;
+        
+        // Scale prices to chart height
+        const scaleY = (price) => height - ((price - minPrice) / priceRange * (height - 2 * padding) + padding);
+        
+        const openY = scaleY(candle.open);
+        const closeY = scaleY(candle.close);
+        const highY = scaleY(candle.high);
+        const lowY = scaleY(candle.low);
+        
+        const isGreen = candle.close >= candle.open;
+        const colorClass = isGreen ? 'candle-green' : 'candle-red';
+        
+        // Wick (high-low line)
+        const wick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        wick.setAttribute('x1', x);
+        wick.setAttribute('y1', highY);
+        wick.setAttribute('x2', x);
+        wick.setAttribute('y2', lowY);
+        wick.setAttribute('class', colorClass);
+        svg.appendChild(wick);
+        
+        // Body (open-close rectangle)
+        const body = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        const bodyTop = Math.min(openY, closeY);
+        const bodyHeight = Math.abs(closeY - openY) || 1; // Minimum 1px
+        body.setAttribute('x', x - candleWidth / 2);
+        body.setAttribute('y', bodyTop);
+        body.setAttribute('width', candleWidth);
+        body.setAttribute('height', Math.max(bodyHeight, 2));
+        body.setAttribute('class', colorClass);
+        svg.appendChild(body);
+    });
+}
+
 // Update coin selector
 function updateCoinSelector(prices) {
     const selector = document.getElementById('coinSelector');
@@ -74,6 +155,9 @@ async function updateChart(symbol, timeframe) {
         if (ohlcEls[1]) ohlcEls[1].textContent = formatPrice(high);
         if (ohlcEls[2]) ohlcEls[2].textContent = formatPrice(low);
         if (ohlcEls[3]) ohlcEls[3].textContent = (volume / 1000000).toFixed(2) + 'M';
+        
+        // Draw candlestick chart
+        drawCandlestickChart(candles);
         
         // Update order book
         updateOrderBook(currentPrice);
