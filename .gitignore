@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local dev
+*_backup.html
+stitch-reference.html
+preview-server.py
+debug_server.py
+restart_server.py
+clear_cache.py
+build.py
+
+# Stitch UI (not used in production)
+stitch-ui/
+
+# Large files
+*.pkl
+*.h5
+*.model
