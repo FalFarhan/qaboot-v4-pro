@@ -595,5 +595,41 @@
                 }, 2000);
             }
         }
+        
+        // Portfolio Data Sync - Update dashboard numbers
+        async function updatePortfolioStats() {
+            try {
+                const response = await fetch('/api/portfolio/summary');
+                const data = await response.json();
+                
+                // Update header stats
+                document.getElementById('header-total').textContent = `$${data.total_value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                
+                const pnlSign = data.total_change_24h >= 0 ? '+' : '';
+                const pnlElement = document.getElementById('header-pnl');
+                pnlElement.textContent = `${pnlSign}${data.total_change_24h.toFixed(2)}%`;
+                pnlElement.className = `text-xs font-bold ${data.total_change_24h >= 0 ? 'text-primary' : 'text-error'}`;
+                
+                document.getElementById('header-signals').textContent = data.active_signals;
+                
+                // Update main stats cards
+                document.getElementById('total-value').textContent = `$${data.total_value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                
+                const mainPnl = document.getElementById('pnl');
+                const mainPnlValue = (data.total_value * data.total_change_24h / 100).toFixed(2);
+                mainPnl.textContent = `${pnlSign}$${Math.abs(mainPnlValue).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                mainPnl.className = `text-2xl font-bold tracking-tight ${data.total_change_24h >= 0 ? 'text-primary-dim' : 'text-error'}`;
+                
+                document.getElementById('active-signals').textContent = data.active_signals;
+                
+            } catch (error) {
+                console.error('Error updating portfolio stats:', error);
+            }
+        }
+        
+        // Run on page load
+        document.addEventListener('DOMContentLoaded', updatePortfolioStats);
+        // Auto-refresh every 30 seconds
+        setInterval(updatePortfolioStats, 30000);
     </script>
 </body></html>

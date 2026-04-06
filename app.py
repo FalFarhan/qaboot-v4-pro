@@ -482,6 +482,62 @@ def calculate_trade():
     
     return jsonify(result)
 
+# ============== PORTFOLIO API ==============
+@app.route('/api/portfolio/summary')
+def get_portfolio_summary():
+    """ملخص المحفظة"""
+    # بيانات المحفظة الفعلية (تستطيع تعديلها لاحقاً)
+    portfolio = {
+        'BTC': 0.001331,
+        'ETH': 0.025971,
+        'SOL': 1.09,
+        'USDT': 85.26,
+        'XRP': 16.84,
+        'TAO': 0.072073,
+        'ADA': 80.69,
+        'NEAR': 14.06,
+        'ATH': 2651,
+        'ZBT': 147.98,
+        'FET': 62.69,
+        'AVAX': 1.55,
+        'VIRTUAL': 21.92,
+        'STX': 56.44,
+        'ZETA': 222.19,
+        'SEI': 206.19,
+        'KAS': 342.99,
+        'SYRUP': 51.45,
+        'TRAC': 31.00,
+        'W': 678.92,
+        'KTA': 44.55,
+        'ONDO': 27.17,
+        'SUI': 7.79,
+        'BIO': 223.65,
+        'KO': 237.88,
+        'POL': 14.56
+    }
+    
+    prices = api.get_all_prices()
+    
+    total_value = 0
+    total_change = 0
+    count = 0
+    
+    for coin, amount in portfolio.items():
+        if coin in prices:
+            coin_value = amount * prices[coin]['price']
+            total_value += coin_value
+            total_change += prices[coin]['change']
+            count += 1
+    
+    avg_change = total_change / count if count > 0 else 0
+    
+    return jsonify({
+        'total_value': round(total_value, 2),
+        'total_change_24h': round(avg_change, 2),
+        'assets_count': len(portfolio),
+        'active_signals': 12
+    })
+
 # ============== PAGE ROUTES ==============
 @app.route('/charts')
 def charts_page():
